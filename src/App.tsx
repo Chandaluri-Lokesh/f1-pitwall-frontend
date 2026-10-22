@@ -2,7 +2,6 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import Navbar from '@/components/Navbar'
 import DashboardPage from '@/pages/DashboardPage'
 import StrategyPage from '@/pages/StrategyPage'
-import BenchmarkPage from '@/pages/BenchmarkPage'
 import ComparePage from '@/pages/ComparePage'
 import LivePage from '@/pages/LivePage'
 
@@ -14,7 +13,6 @@ export default function App() {
         <Routes>
           <Route path="/"           element={<DashboardPage />} />
           <Route path="/strategy"   element={<StrategyPage />} />
-          <Route path="/benchmark"  element={<BenchmarkPage />} />
           <Route path="/compare"    element={<ComparePage />} />
           <Route path="/live"       element={<LivePage />} />
           <Route path="*"           element={<Navigate to="/" replace />} />
