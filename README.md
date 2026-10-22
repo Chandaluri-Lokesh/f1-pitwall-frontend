@@ -1,49 +1,131 @@
 # F1 PitWall — Frontend
 
-React 18 + TypeScript SPA. Requires the C++ backend running on `:8080`.
+> React + TypeScript SPA for visualising F1 pit-stop strategies, algorithm comparisons, and Monte Carlo benchmarks.
 
-All `/api/*` requests are proxied by Vite — no CORS configuration needed in development.
+![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript)
+![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-38BDF8?logo=tailwindcss)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-## Setup
+---
+
+## Overview
+
+F1 PitWall is a full-stack Formula 1 strategy analysis tool. This frontend communicates with the [C++ backend](https://github.com/Chandaluri-Lokesh/f1-pitwall-backend) to run five pit-stop optimization algorithms on real telemetry data and visualise their results side-by-side.
+
+All `/api/*` requests are proxied to `localhost:8080` by Vite — no CORS configuration needed in development.
+
+---
+
+## Features
+
+- **Strategy Page** — pick a circuit, driver, and team; select which algorithms to run; view lap-time overlay chart and per-algorithm results table
+- **Benchmark Page** — configure Monte Carlo simulations (count, threads, AoS/SoA layout, CUDA toggle); view timing table with speedup column and bar charts
+- **Compare Page** — run two independent scenarios side-by-side; overlaid lap-time chart (red vs. blue); combined results table with delta column
+- **Live Timing Page** — real-time F1 data via OpenF1 API; session info, flag/SC banners, driver grid, pit stop table, race control feed
+
+---
+
+## Quick Start
+
+The C++ backend must be running on port `8080` before starting the frontend.
 
 ```bash
+# Install dependencies
 npm install
-npm run dev        # dev server on :5173
-npm run build      # production build → dist/
+
+# Start dev server (proxies /api/* to localhost:8080)
+npm run dev
+
+# Production build
+npm run build
 ```
+
+Dev server runs on `http://localhost:5173` (or `:5174` if taken).
+
+---
 
 ## Pages
 
 | Route | Page | Description |
-| --- | --- | --- |
-| `/` | Dashboard | Three module cards linking to each section |
-| `/strategy` | DSA Strategy | Circuit picker, driver/team selector, algorithm checkboxes, lap-time overlay chart, per-algorithm results table |
-| `/benchmark` | COA Benchmark | Sim config (sims, OMP threads, AoS/SoA layout), CUDA toggle, timing table with speedup, bar charts |
-| `/compare` | Compare | Two scenario panels (A = red, B = blue), overlay lap-time chart, combined results table with Δ column |
-| `/live` | Live Timing | Real-time F1 data via OpenF1 — session header, flag/SC banners, driver grid, pit stop table, race control feed |
+|---|---|---|
+| `/` | Dashboard | Overview cards linking to each module |
+| `/strategy` | DSA Strategy | Circuit + driver + algo picker, lap-time chart, results table |
+| `/benchmark` | COA Benchmark | Monte Carlo config, timing table, speedup bar charts |
+| `/compare` | Compare | Dual-scenario panels, overlaid chart, delta table |
+| `/live` | Live Timing | Real-time OpenF1 data — no backend required |
+
+---
 
 ## Components
 
 | Component | Description |
-| --- | --- |
-| `BenchmarkChart` | Two bar charts (wall ms · speedup); CUDA bar rendered in purple via Recharts `<Cell>` |
-| `StrategyChart` | Lap-time lines per algorithm with `<ReferenceLine>` markers at each pit stop |
-| `AlgoComparison` | Sortable results table: algorithm, race time, stops, states explored, wall ms |
-| `TeamDriverPicker` | Fetches `/api/drivers` + `/api/teams`; shows `tyre_mgmt_factor` |
+|---|---|
+| `StrategyChart` | Recharts line chart — one lap-time series per algorithm, `<ReferenceLine>` at each pit stop |
+| `AlgoComparison` | Results table — algorithm, total race time, stop count, states explored, wall ms |
+| `BenchmarkChart` | Two bar charts (wall time ms + speedup); CUDA bar rendered in purple via Recharts `<Cell>` |
+| `TeamDriverPicker` | Fetches `/api/drivers` + `/api/teams`; displays `tyre_mgmt_factor` per driver |
+| `Navbar` | Top navigation bar with route links |
 
-## API clients
+---
 
-| File | Used by |
-| --- | --- |
-| `src/api/client.ts` | All backend calls (Axios, baseURL `/api`) |
-| `src/api/openf1.ts` | Live Timing page — direct browser calls to `api.openf1.org/v1/`; no backend involved |
+## API Clients
 
-## Stack
+| File | Description |
+|---|---|
+| `src/api/client.ts` | Axios instance (`baseURL: /api`) — all backend calls |
+| `src/api/openf1.ts` | Direct browser calls to `api.openf1.org/v1/` — used only by Live Timing |
 
-- **React 18** + **TypeScript**
-- **Vite** — dev server + proxy + production build
-- **Tailwind CSS** — utility-first styling
-- **Recharts** — bar charts, line charts, reference lines
-- **Axios** — HTTP client
-- **React Router v6** — client-side routing
-- **clsx** — conditional className merging
+---
+
+## Tech Stack
+
+| Layer | Library |
+|---|---|
+| UI framework | React 18 + TypeScript |
+| Build tool | Vite 5 |
+| Styling | Tailwind CSS 3 |
+| Charts | Recharts |
+| HTTP client | Axios |
+| Routing | React Router v6 |
+| Utilities | clsx |
+
+---
+
+## Project Structure
+
+```
+src/
+  api/
+    client.ts         Axios wrapper for all backend endpoints
+    openf1.ts         OpenF1 REST client for live timing
+  components/
+    AlgoComparison.tsx
+    BenchmarkChart.tsx
+    Navbar.tsx
+    StrategyChart.tsx
+    TeamDriverPicker.tsx
+  hooks/
+    useApi.ts         Generic data-fetching hook
+  pages/
+    DashboardPage.tsx
+    StrategyPage.tsx
+    BenchmarkPage.tsx
+    ComparePage.tsx
+    LivePage.tsx
+  types/
+    index.ts          Shared TypeScript interfaces (RaceConfig, HarnessResult, SimResult, …)
+  App.tsx             Router setup
+  main.tsx            React entry point
+index.html
+vite.config.ts        Dev proxy: /api/* → localhost:8080
+tailwind.config.js
+tsconfig.json
+```
+
+---
+
+## Related
+
+- **Backend:** [f1-pitwall-backend](https://github.com/Chandaluri-Lokesh/f1-pitwall-backend) — C++17 solver engine + HTTP API
